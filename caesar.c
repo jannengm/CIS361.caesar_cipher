@@ -66,8 +66,8 @@ char * removeDuplicates(char word []){
     }
   }
 
-  printf("Original string: %s\n", word);
-  printf("Duplciates removed: %s\n", str);
+  //printf("Original string: %s\n", word);
+  //printf("Duplciates removed: %s\n", str);
   return str;
 
 }
