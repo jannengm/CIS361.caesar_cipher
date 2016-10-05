@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define ALPHA_LEN 26
 
@@ -11,12 +12,28 @@ void processInput(FILE * inf, FILE * outf, char substitute[]);
 
 int main(int argc, char* argv[]){
   char encrypt[ALPHA_LEN], decrypt[ALPHA_LEN];
+  FILE *in_file, *out_file;
 
-  initializeEncyptArray(removeDuplicates(argv[1]), encrypt);
+  if(argc != 5){
+    printf("Usage: option key infile outfile\n");
+    printf("Option: 1 for encryption, 2 for decryption\n");
+    return 1;
+  }
 
+  if ( ( in_file = fopen( argv[3], "r" ) ) == NULL ){
+    printf( "Error opening input file: %s\n", argv[3] );
+    return 1;
+  }
+  if ( ( out_file = fopen( argv[4], "w+" ) ) == NULL ){
+    fclose(in_file);
+    printf( "Error opening output file: %s\n", argv[4] );
+    return 1;
+  }
 
-  //Test initializeEncyptArray
+  initializeEncyptArray(removeDuplicates(argv[2]), encrypt);
 
+  fclose(in_file);
+  fclose(out_file);
   return 0;
 }
 
@@ -57,7 +74,7 @@ int targetFound(char charArray[], int num, char target){
 // initialize the encrypt array with appropriate cipher letters according
 // to the given key
 void initializeEncyptArray(char key[], char encrypt[]){
-  char alphabet[ALPHA_LEN + 1];
+  char alphabet[ALPHA_LEN];
   int i, key_len, j;
   key_len = strlen(key);
 
@@ -80,6 +97,9 @@ void initializeEncyptArray(char key[], char encrypt[]){
     }
   }
 
+  encrypt[ALPHA_LEN] = '\0';
+
+  //Test encryption array
   printf("Encryption key: %s\n", key);
   printf("Encryption array: %s\n", encrypt);
 }
