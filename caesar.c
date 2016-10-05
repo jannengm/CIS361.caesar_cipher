@@ -6,8 +6,8 @@
 
 char * removeDuplicates(char word []);
 int targetFound(char charArray[], int num, char target);
-void initializeEncyptArray(char key[], char encrypt[]);
-void initializeDecyptArray(char encypt[], char decrypt[]);
+void initializeEncryptArray(char key[], char encrypt[]);
+void initializeDecryptArray(char encrypt[], char decrypt[]);
 void processInput(FILE * inf, FILE * outf, char substitute[]);
 
 int main(int argc, char* argv[]){
@@ -30,7 +30,19 @@ int main(int argc, char* argv[]){
     return 1;
   }
 
-  initializeEncyptArray(removeDuplicates(argv[2]), encrypt);
+  initializeEncryptArray(removeDuplicates(argv[2]), encrypt);
+  initializeDecryptArray(encrypt, decrypt);
+
+  if( *argv[1] == '1' ){
+    processInput(in_file, out_file, encrypt);
+  }
+  else if( *argv[1] == '2' ){
+    processInput(in_file, out_file, decrypt);
+  }
+  else {
+    printf("Usage: option key infile outfile\n");
+    printf("Option: 1 for encryption, 2 for decryption\n");
+  }
 
   fclose(in_file);
   fclose(out_file);
@@ -73,7 +85,7 @@ int targetFound(char charArray[], int num, char target){
 
 // initialize the encrypt array with appropriate cipher letters according
 // to the given key
-void initializeEncyptArray(char key[], char encrypt[]){
+void initializeEncryptArray(char key[], char encrypt[]){
   char alphabet[ALPHA_LEN];
   int i, key_len, j;
   key_len = strlen(key);
@@ -100,19 +112,37 @@ void initializeEncyptArray(char key[], char encrypt[]){
   encrypt[ALPHA_LEN] = '\0';
 
   //Test encryption array
-  printf("Encryption key: %s\n", key);
-  printf("Encryption array: %s\n", encrypt);
+  /*printf("Encryption key: %s\n", key);
+  printf("Alphabet:         ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
+  printf("Encryption array: %s\n", encrypt);*/
 }
 
 // initialize the decrypt array with appropriate substitute letters based
 // on the encrypt array
-void initializeDecyptArray(char encypt[], char decrypt[]){
+void initializeDecryptArray(char encrypt[], char decrypt[]){
+  int i;
+  for(i = 0; i < ALPHA_LEN; ++i){
+    decrypt[ encrypt[i] - 'A' ] = 'A' + i;
+  }
 
+  /*printf("Encryption array: %s\n", encrypt);
+  printf("Decryption array: %s\n", decrypt);
+  printf("Alphabet:         ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");*/
 }
 
 // process data from the input file and write the result to the output file
 // pass the encrypt array to parameter substitute if encryption is intended
 // pass the decrypt array to parameter substitute if decryption is intended
 void processInput(FILE * inf, FILE * outf, char substitute[]){
-
+  char ch;
+  while( ( ch = fgetc(inf) ) && !feof(inf) ){
+    //ch = fgetc(inf);
+    if( ch >= 'A' && ch <= 'Z' ){
+      ch = substitute[ch - 'A'];
+    }
+    if( ch >= 'a' && ch <= 'z' ){
+      ch = tolower( substitute[ toupper(ch) - 'A' ] );
+    }
+    fputc(ch, outf);
+  }
 }
