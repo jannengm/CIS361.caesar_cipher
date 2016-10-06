@@ -11,7 +11,8 @@ test2:
 
 clean:
 	rm *.o
+	rm *.out
 	rm *.bak
 	rm *caesar
 
-rebuild: clean caesar
+retest: clean caesar test

@@ -1,3 +1,7 @@
+/*Project 1 - Substitution Ciphers
+ *CIS 361 System Programming F16
+ *@author Mark Jannenga*/
+
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -14,12 +18,14 @@ int main(int argc, char* argv[]){
   char encrypt[ALPHA_LEN], decrypt[ALPHA_LEN];
   FILE *in_file, *out_file;
 
+  // Check that the correct number of arguments was supplied
   if(argc != 5){
     printf("Usage: option key infile outfile\n");
     printf("Option: 1 for encryption, 2 for decryption\n");
     return 1;
   }
 
+  //Try to open input file and output file
   if ( ( in_file = fopen( argv[3], "r" ) ) == NULL ){
     printf( "Error opening input file: %s\n", argv[3] );
     return 1;
@@ -30,9 +36,13 @@ int main(int argc, char* argv[]){
     return 1;
   }
 
+  //Remove duplicates from the key, initialize encrypt and
+  //decrypt arrays
   initializeEncryptArray(removeDuplicates(argv[2]), encrypt);
   initializeDecryptArray(encrypt, decrypt);
 
+  //Either encrypt or decrypt based on option paraneter
+  //Print error if invalid option specified
   if( *argv[1] == '1' ){
     processInput(in_file, out_file, encrypt);
   }
@@ -44,6 +54,7 @@ int main(int argc, char* argv[]){
     printf("Option: 1 for encryption, 2 for decryption\n");
   }
 
+  //Close input and out files and exit
   fclose(in_file);
   fclose(out_file);
   return 0;
@@ -51,25 +62,22 @@ int main(int argc, char* argv[]){
 
 // remove duplicate characters in array word and return the result string
 char * removeDuplicates(char word []){
-  static char str[ALPHA_LEN];
+  static char str[ALPHA_LEN] = {'\0'};
   char ch;
   int i, j;
 
+  // Loopthrough all characters in word. If the character is not already
+  // in the output string, add it to the output string
   j = 0;
-  memset( str, '\0', ALPHA_LEN );
-
   for( i = 0; i < strlen(word); ++i ){
     ch = toupper(word[i]);
-    if ( strchr(str, ch) == NULL ){
+    if ( targetFound(str, i, ch) == 0 ){
       str[j] = ch;
       j++;
     }
   }
 
-  //printf("Original string: %s\n", word);
-  //printf("Duplciates removed: %s\n", str);
   return str;
-
 }
 
 // search the first num characters in array charArray for character target
@@ -90,31 +98,26 @@ void initializeEncryptArray(char key[], char encrypt[]){
   int i, key_len, j;
   key_len = strlen(key);
 
-  //Create an array holding the alphabet
+  // Create an array holding the alphabet
   for(i = 0; i < ALPHA_LEN; ++i){
     alphabet[i] = 'A' + i;
   }
 
-  //Put the key in the beginiing of the encryption array
-  //Remove those letters from the alphabet
+  // Put the key in the beginning of the encryption array
+  // Remove those letters from the alphabet
   for(i = 0; i < key_len; ++i){
     encrypt[i] = key[i];
     alphabet[ key[i] - 'A' ] = '\0';
   }
 
+  // Loop through the alphabet backwards, add any unused characters
+  // to the array
   j = 0;
-  for(i = 0; i < ALPHA_LEN; ++i){
-    if(alphabet[ALPHA_LEN - i - 1] != '\0'){
-      encrypt[key_len + j++] = alphabet[ALPHA_LEN - i - 1];
+  for(i = 1; i <= ALPHA_LEN; ++i){
+    if(alphabet[ALPHA_LEN - i] != '\0'){
+      encrypt[key_len + j++] = alphabet[ALPHA_LEN - i];
     }
   }
-
-  encrypt[ALPHA_LEN] = '\0';
-
-  //Test encryption array
-  /*printf("Encryption key: %s\n", key);
-  printf("Alphabet:         ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
-  printf("Encryption array: %s\n", encrypt);*/
 }
 
 // initialize the decrypt array with appropriate substitute letters based
@@ -124,10 +127,6 @@ void initializeDecryptArray(char encrypt[], char decrypt[]){
   for(i = 0; i < ALPHA_LEN; ++i){
     decrypt[ encrypt[i] - 'A' ] = 'A' + i;
   }
-
-  /*printf("Encryption array: %s\n", encrypt);
-  printf("Decryption array: %s\n", decrypt);
-  printf("Alphabet:         ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");*/
 }
 
 // process data from the input file and write the result to the output file
@@ -136,7 +135,6 @@ void initializeDecryptArray(char encrypt[], char decrypt[]){
 void processInput(FILE * inf, FILE * outf, char substitute[]){
   char ch;
   while( ( ch = fgetc(inf) ) && !feof(inf) ){
-    //ch = fgetc(inf);
     if( ch >= 'A' && ch <= 'Z' ){
       ch = substitute[ch - 'A'];
     }
